@@ -1,0 +1,19 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "Learning MERN - https://whispering-sea-84300.herokuapp.com",
+  "repository": "https://git.heroku.com/whispering-sea-84300.git",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "1.18.2",
+    "express": "4.15.5",
+    "mongodb": "2.2.31"
+  }
+}
