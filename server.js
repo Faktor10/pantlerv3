@@ -42,8 +42,8 @@ app.get('/ingredients', (req,res) => {
 })
 
 app.post('/ingredients', (req,res) => {
-    const newIngredient = res.body
-    if (!(res.body.name || res.body.quantity)) {
+    const newIngredient = req.body
+    if (!(req.body.name || req.body.quantity)) {
         handleError(res,'Invalid user input', "must provide a name and quantity",400)
     }
     db.collection(INGREDIENTS_COLLECTION).insertOne(newIngredient, (err, doc) => {
