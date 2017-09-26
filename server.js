@@ -38,7 +38,12 @@ const handleError = (res,reason, message, code) => {
 
 
 app.get('/ingredients', (req,res) => {
-    
+  db.collection(INGREDIENTS_COLLECTION).find({}).toArray((err, docs) => {
+      if (err) {
+          handleError(res, err.message, 'Failed to get contacts')
+      }
+      res.status(200).json(docs)
+  })  
 })
 
 app.post('/ingredients', (req,res) => {
