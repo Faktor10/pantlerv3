@@ -43,7 +43,6 @@ app.get('/ingredients', (req,res) => {
 
 app.post('/ingredients', (req,res) => {
     const newIngredient = res.body
-    newIngredient.createDate = new Date()
     if (!(res.body.name || res.body.quantity)) {
         handleError(res,'Invalid user input', "must provide a name and quantity",400)
     }
