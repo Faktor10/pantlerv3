@@ -69,9 +69,21 @@ app.get('/ingredients/:id', (req,res) => {
 })
 
 app.put('/ingredients/:id', (req,res) => {
-    
+    const updatedoc = req.body
+    delete updatedoc._id
+    db.collection(INGREDIENTS_COLLECTION).updateOne({_id: new ObjectID(req.params.id)}, updatedoc, (err,doc) => {
+        if (err) {
+            handleError(err, err.message, 'Failed to update')
+        }
+        res.status(204).end()
+    })
 })
 
 app.delete('/ingredients/:id', (req,res) => {
-    
+    db.collection(INGREDIENTS_COLLECTION).deleteOne({_id: new ObjectID(req.params.id)}, (err,doc) => {
+        if (err) {
+            handleError(err,err.message, "Failed to delete entry")
+        }
+        res.status(204).end()
+    })
 })
