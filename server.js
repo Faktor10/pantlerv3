@@ -1,89 +1,112 @@
-//https://www.sitepoint.com/deploy-rest-api-in-30-mins-mlab-heroku/ 
+//https://scotch.io/tutorials/build-a-restful-api-using-node-and-express-4
+
+require('dot-env').config;
 
 const express = require('express')
-const path = require('path')
-const bodyParser = require('body-parser')
-const mongodb = require('mongodb')
-
-const ObjectID = mongodb.ObjectID
-
-const INGREDIENTS_COLLECTION = 'ingredients'
-
 const app = express()
-app.use(express.static(path.join(__dirname, 'public')))
+const bodyParser = require('body-parser')
+const cors = require('cors')
+const path = require('path')
+
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+app.use(cors())
 
-let db
 
-mongodb.MongoClient.connect(process.env.MONGODB_URI, (err, database) => {
-    if (err) {
-        console.error(err)
-        process.exit(1)
-    }
+const INGREDIENT_FILE = path.join(__dirname, 'ingredient.json')
+
+
+const port = process.env.PORT || 8080
+
+const router = express.Router()
+
+const mongoose = require('mongoose')
+mongoose.Promise = global.Promise
+mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true })
+
+
+app.options('*', cors())
+
+router.use((req,res,next) => {
+    next()
+})
+
+router.get('/', (req,res) => {
+    res.json({message: 'whoop whoop!'})
+})
+
+const Ingredient = require('./app/models/ingredient')
+
+router.route('/ingredients')
+
+        .post((req, res) => {
+            const newIngredient = new Ingredient()
+            newIngredient.id = req.body.id
+            newIngredient.name = req.body.name
+            newIngredient.quantity = req.body.quantity
+            newIngredient.measurement = req.body.measurement
+            newIngredient.save((err) => {
+            if (err) {
+              res.send(err)
+            }
+            res.json({message: 'Ingredient Created'})
+           })
+        })
+        .get((req,res) => {
+            Ingredient.find((err, ingredients) => {
+                if (err) {
+                    res.send(err)
+                }
+                res.json(ingredients)
+            })
     
-    db = database
-    console.log('database ready')
-    const server = app.listen(process.env.PORT || 8080, () => {
-        const port = server.address().port
-        console.log(`Server is runnning on port ${port}`)
-    })
-})
+        })
+        
+const diff = (str1, str2) => {
+    return (str1 !== str2)
+}        
+        
+router.route('/ingredients/:ingredient_id')
 
+        .get((req, res) => {
+            Ingredient.findById(req.params.ingredient_id, 
+            (err, ingredient) => {
+              if (err) {
+                res.send(err)  
+              }    
+              res.json(ingredient)
+            })
+        })
+        .put((req, res) => {
+            Ingredient.findById(req.params.ingredient_id, (err, ingredient) => {
+                if (err) {
+                    res.send(err)
+                }
+                
+                ingredient.name = diff(req.body.name, ingredient.name) ? req.body.name : ingredient.name
+                ingredient.quantity = diff(req.body.quantity, ingredient.quantity) ? req.body.quantity : ingredient.quantity
+                ingredient.measurement = diff(req.body.measurement, ingredient.measurement) ? req.body.measurement : ingredient.measurement
+                
+                ingredient.save((err) => {
+                    if (err) {
+                        res.send(err)
+                    }
+                    
+                    res.json({message: 'Ingredient updated'})
+                })
+            })
+        })
+        .delete((req, res) => {
+            Ingredient.remove({_id: req.params.ingredient_id}, (err, ingredient) => {
+                if (err) {
+                    res.send(err)
+                }
+                res.json({message: 'Ingredient deleted'})
+            })
+        })
 
-const handleError = (res,reason, message, code) => {
-    console.error(`ERROR ${reason}`)
-    res.status(code || 500).json({'error': message})
-}
+app.use('/api', router)
 
+app.listen(port)
 
-
-app.get('/ingredients', (req,res) => {
-  db.collection(INGREDIENTS_COLLECTION).find({}).toArray((err, docs) => {
-      if (err) {
-          handleError(res, err.message, 'Failed to get ingredients')
-      }
-      res.status(200).json(docs)
-  })  
-})
-
-app.post('/ingredients', (req,res) => {
-    const newIngredient = req.body
-    if (!(req.body.name || req.body.quantity)) {
-        handleError(res,'Invalid user input', "must provide a name and quantity",400)
-    }
-    db.collection(INGREDIENTS_COLLECTION).insertOne(newIngredient, (err, doc) => {
-        if (err) {
-            handleError(res, err.message, 'Failed to add to DB')
-        }
-        res.status(201).json(doc.ops[0])
-    })
-})
-
-app.get('/ingredients/:id', (req,res) => {
-    db.collection(INGREDIENTS_COLLECTION).findOne({_id: new ObjectID(req.params.id)}, (err, doc)=> {
-        if (err) {
-            handleError(res, err.message, 'Failed to get ingredient')
-        }
-        res.code(200).json(doc)
-    })
-})
-
-app.put('/ingredients/:id', (req,res) => {
-    const updatedoc = req.body
-    delete updatedoc._id
-    db.collection(INGREDIENTS_COLLECTION).updateOne({_id: new ObjectID(req.params.id)}, updatedoc, (err,doc) => {
-        if (err) {
-            handleError(err, err.message, 'Failed to update')
-        }
-        res.status(204).end()
-    })
-})
-
-app.delete('/ingredients/:id', (req,res) => {
-    db.collection(INGREDIENTS_COLLECTION).deleteOne({_id: new ObjectID(req.params.id)}, (err,doc) => {
-        if (err) {
-            handleError(err,err.message, "Failed to delete entry")
-        }
-        res.status(204).end()
-    })
-})
+console.log(`Magic happening on port ${port}`)
