@@ -4,10 +4,14 @@
   "description": "Learning MERN - https://whispering-sea-84300.herokuapp.com",
   "repository": "https://git.heroku.com/whispering-sea-84300.git",
   "main": "server.js",
+  "engines": {
+    "node": "8"
+  },
   "scripts": {
     "test": "npm run test-unit",
     "test-unit": "NODE_ENV=test mocha  './*.spec.js'",
-    "start": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
