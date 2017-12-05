@@ -38,10 +38,11 @@ router
   .route("/ingredients")
   .post((req, res) => {
     const newIngredient = new Ingredient();
-    newIngredient.id = req.body.UniqueId;
+    newIngredient.uniqueId = req.body.uniqueId;
     newIngredient.name = req.body.name;
     newIngredient.quantity = req.body.quantity;
     newIngredient.measurement = req.body.measurement;
+    newIngredient.imgUrl = req.body.imgUrl;
     newIngredient.save(err => {
       if (err) {
         res.send(err);
