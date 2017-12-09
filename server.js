@@ -59,10 +59,6 @@ router
     });
   });
 
-const diff = (str1, str2) => {
-  return str1 !== str2;
-};
-
 router
   .route("/ingredients/:ingredient_id")
   .get((req, res) => {
@@ -79,18 +75,12 @@ router
         res.send(err);
       }
 
-      ingredient.name = diff(req.body.name, ingredient.name)
-        ? req.body.name
-        : ingredient.name;
-      ingredient.quantity = diff(req.body.quantity, ingredient.quantity)
-        ? req.body.quantity
-        : ingredient.quantity;
-      ingredient.measurement = diff(
-        req.body.measurement,
-        ingredient.measurement
-      )
-        ? req.body.measurement
-        : ingredient.measurement;
+      (ingredient.name = req.body.name),
+        ingredient.name ? req.body.name : ingredient.name;
+      (ingredient.quantity = req.body.quantity),
+        ingredient.quantity ? req.body.quantity : ingredient.quantity;
+      (ingredient.measurement = req.body.measurement),
+        ingredient.measurement ? req.body.measurement : ingredient.measurement;
 
       ingredient.save(err => {
         if (err) {
@@ -102,15 +92,12 @@ router
     });
   })
   .delete((req, res) => {
-    Ingredient.remove(
-      { UniqueId: req.params.ingredient_id },
-      (err, ingredient) => {
-        if (err) {
-          res.send(err);
-        }
-        res.json({ message: "Ingredient deleted" });
+    Ingredient.remove({ _id: req.params.ingredient_id }, (err, ingredient) => {
+      if (err) {
+        res.send(err);
       }
-    );
+      res.json({ message: "Ingredient deleted" });
+    });
   });
 
 app.use("/api", router);
