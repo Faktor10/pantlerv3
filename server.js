@@ -1,18 +1,17 @@
 //https://scotch.io/tutorials/build-a-restful-api-using-node-and-express-4
 
-require("dot-env").config;
+require('dotenv').config()
+console.log(process.env.MONGODB_URI)
 
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
-
+console.log(process.env.MONGODB_URI)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
-
-const INGREDIENT_FILE = path.join(__dirname, "ingredient.json");
 
 const port = process.env.PORT || 8080;
 
@@ -38,16 +37,15 @@ router
   .route("/ingredients")
   .post((req, res) => {
     const newIngredient = new Ingredient();
-    newIngredient.uniqueId = req.body.uniqueId;
     newIngredient.name = req.body.name;
     newIngredient.quantity = req.body.quantity;
     newIngredient.measurement = req.body.measurement;
     newIngredient.imgUrl = req.body.imgUrl;
-    newIngredient.save(err => {
+    newIngredient.save((err, ingredient) => {
       if (err) {
         res.send(err);
       }
-      res.json({ message: "Ingredient Created" });
+      res.json({ _id: ingredient.id });
     });
   })
   .get((req, res) => {
